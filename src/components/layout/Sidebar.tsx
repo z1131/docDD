@@ -1,10 +1,56 @@
-import { FileText, FolderOpen, Search, Plus } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { DocTree } from './DocTree'
+import { FileService, FileNode } from '@/services/file.service'
+import { useDocumentStore } from '@/store/document.store'
+import { DocumentService } from '@/services/document.service'
 
 interface SidebarProps {
   onCreateDoc?: () => void
 }
 
 export function Sidebar({ onCreateDoc }: SidebarProps) {
+  const [docTree, setDocTree] = useState<FileNode[]>([])
+  const [loading, setLoading] = useState(true)
+  const { setCurrentDocument } = useDocumentStore()
+
+  // 加载文档树
+  useEffect(() => {
+    loadDocTree()
+  }, [])
+
+  const loadDocTree = async () => {
+    try {
+      setLoading(true)
+      const tree = await FileService.getDocTree()
+      setDocTree(tree)
+    } catch (error) {
+      console.error('加载文档树失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 点击文档文件
+  const handleFileClick = async (node: FileNode) => {
+    if (node.type !== 'file') return
+
+    try {
+      const content = await FileService.readDocument(node.path)
+
+      // 创建或更新文档
+      const doc = await DocumentService.createDocument(
+        node.path.replace('/project-docs/', ''),
+        node.name,
+        content
+      )
+
+      setCurrentDocument(doc)
+    } catch (error) {
+      console.error('加载文档失败:', error)
+    }
+  }
+
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
       {/* Header */}
@@ -33,27 +79,17 @@ export function Sidebar({ onCreateDoc }: SidebarProps) {
 
       {/* Document Tree */}
       <div className="flex-1 overflow-y-auto p-2">
-        <div className="space-y-1">
-          {[
-            { name: '项目概览', type: 'file' },
-            { name: '业务模块', type: 'dir' },
-            { name: '技术实现', type: 'dir' },
-            { name: 'API规范', type: 'dir' },
-            { name: '任务管理', type: 'dir' },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-            >
-              {item.type === 'dir' ? (
-                <FolderOpen size={16} className="mr-3 text-gray-500" />
-              ) : (
-                <FileText size={16} className="mr-3 text-blue-500" />
-              )}
-              <span className="text-gray-700">{item.name}</span>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-gray-500 py-8">
+            <div className="animate-pulse">加载文档中...</div>
+          </div>
+        ) : docTree.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">
+            暂无文档
+          </div>
+        ) : (
+          <DocTree nodes={docTree} onFileClick={handleFileClick} />
+        )}
       </div>
 
       {/* Footer */}
@@ -65,3 +101,4 @@ export function Sidebar({ onCreateDoc }: SidebarProps) {
     </div>
   )
 }
+
