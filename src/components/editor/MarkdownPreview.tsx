@@ -2,6 +2,15 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/github.css'
+import { CodeProps } from 'react-markdown/lib/ast-to-react'
+import { ComponentPropsWithoutRef } from 'react'
+
+// 定义类型声明
+type CodeComponentProps = CodeProps & ComponentPropsWithoutRef<'code'> & {
+  inline?: boolean
+  className?: string
+  children?: React.ReactNode
+}
 
 interface MarkdownPreviewProps {
   content: string
@@ -15,36 +24,36 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
         rehypePlugins={[rehypeHighlight]}
         components={{
           // 自定义组件样式
-          h1: ({ node, ...props }) => (
+          h1: ({ ...props }) => (
             <h1 className="border-b border-gray-200 pb-2 mb-4" {...props} />
           ),
-          h2: ({ node, ...props }) => (
+          h2: ({ ...props }) => (
             <h2 className="border-b border-gray-200 pb-1 mb-3 mt-6" {...props} />
           ),
-          a: ({ node, ...props }) => (
+          a: ({ ...props }) => (
             <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
           ),
-          blockquote: ({ node, ...props }) => (
+          blockquote: ({ ...props }) => (
             <blockquote className="border-l-4 border-gray-300 pl-4 my-4 text-gray-600 italic" {...props} />
           ),
-          table: ({ node, ...props }) => (
+          table: ({ ...props }) => (
             <div className="overflow-x-auto my-4">
               <table className="min-w-full border-collapse border border-gray-300" {...props} />
             </div>
           ),
-          th: ({ node, ...props }) => (
+          th: ({ ...props }) => (
             <th className="border border-gray-300 px-4 py-2 bg-gray-50 font-semibold" {...props} />
           ),
-          td: ({ node, ...props }) => (
+          td: ({ ...props }) => (
             <td className="border border-gray-300 px-4 py-2" {...props} />
           ),
-          pre: ({ node, ...props }) => (
+          pre: ({ ...props }) => (
             <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto" {...props} />
           ),
-          code({ node, inline, className, children, ...props }) {
+          code: ({ inline, className, children, ...props }: CodeComponentProps) => {
             const match = /language-(\w+)/.exec(className || '')
             return !inline && match ? (
-              <code className={`${className}`} {...props}>
+              <code className={`${className || ''}`} {...props}>
                 {children}
               </code>
             ) : (
