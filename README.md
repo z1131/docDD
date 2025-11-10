@@ -35,10 +35,10 @@ npm run build
 
 ## 文档结构
 
-项目采用分层文档结构：
+项目采用分层文档结构，开发文档位于 `project-docs/` 目录：
 
 ```
-docs/
+project-docs/                   # 开发文档（面向开发者）
 ├── 00-project-overview.md      # 项目概览与愿景
 ├── 01-business-modules/        # 业务模块设计
 ├── 02-technical-design/        # 技术架构设计
@@ -47,6 +47,10 @@ docs/
 ├── 03-api-specs/               # API接口规范
 └── 04-tasks/                   # 任务列表
 ```
+
+**说明**：
+- `README.md` - 面向开源用户的使用文档
+- `project-docs/` - 面向开发者的开发过程文档（践行文档驱动开发思想）
 
 ## 技术栈
 
