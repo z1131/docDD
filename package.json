@@ -10,11 +10,15 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "highlight.js": "^11.11.1",
     "idb": "^8.0.3",
     "lucide-react": "^0.553.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.5",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

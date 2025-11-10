@@ -39,13 +39,14 @@ npm run build
 
 ```
 project-docs/                   # 开发文档（面向开发者）
-├── 00-project-overview.md      # 项目概览与愿景
-├── 01-business-modules/        # 业务模块设计
-├── 02-technical-design/        # 技术架构设计
-│   ├── 01-architecture.md      # 系统架构
-│   └── 02-project-setup.md     # 项目配置
-├── 03-api-specs/               # API接口规范
-└── 04-tasks/                   # 任务列表
+├── 00-项目概览.md              # 项目概览与愿景
+├── 01-业务模块/                # 业务模块设计
+│   └── 01-核心模块.md          # 核心业务模块
+├── 02-技术设计/                # 技术架构设计
+│   ├── 01-架构设计.md          # 系统架构
+│   └── 02-项目配置.md          # 项目配置
+├── 03-API规范/                 # API接口规范
+└── 04-任务列表/                # 任务列表
 ```
 
 **说明**：
