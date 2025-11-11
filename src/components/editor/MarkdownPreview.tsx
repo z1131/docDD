@@ -18,21 +18,12 @@ interface MarkdownPreviewProps {
 
 export function MarkdownPreview({ content }: MarkdownPreviewProps) {
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="prose prose-gray max-w-none prose-h1:text-3xl prose-h1:font-bold prose-h2:text-2xl prose-h2:font-bold prose-h3:text-xl prose-h3:font-semibold prose-p:text-gray-700 prose-li:text-gray-700 prose-code:text-gray-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
         components={{
-          // 自定义组件样式
-          h1: ({ ...props }) => (
-            <h1 className="text-3xl font-bold mt-6 mb-4 border-b border-gray-200 pb-2" {...props} />
-          ),
-          h2: ({ ...props }) => (
-            <h2 className="text-2xl font-bold mt-5 mb-3 border-b border-gray-200 pb-1" {...props} />
-          ),
-          h3: ({ ...props }) => (
-            <h3 className="text-xl font-semibold mt-4 mb-2" {...props} />
-          ),
+          // 自定义组件样式（不使用h1/h2，让Tailwind Typography处理标题大小）
           a: ({ ...props }) => (
             <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
           ),
