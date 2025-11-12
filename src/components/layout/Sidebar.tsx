@@ -56,7 +56,7 @@ export function Sidebar({ onCreateDoc }: SidebarProps) {
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold text-gray-900">AI文档系统</h1>
+          <h1 className="text-lg font-semibold text-gray-900">Dodo</h1>
           <button
             onClick={onCreateDoc}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
