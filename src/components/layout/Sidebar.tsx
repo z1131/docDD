@@ -1,8 +1,9 @@
-import { Search, Plus } from 'lucide-react'
+import { Search, Plus, FolderPlus, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { DocTree } from './DocTree'
-import { FileService, FileNode } from '@/services/file.service'
+import { useFileSystem } from '@/store/fileSystem.store'
 import { useDocumentStore } from '@/store/document.store'
+import { DirectoryItem } from '@/components/file-system/DirectoryItem'
+import { CreateDirectoryModal } from '@/components/modals/CreateDirectoryModal'
 import { DocumentService } from '@/services/document.service'
 
 interface SidebarProps {
@@ -10,42 +11,59 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onCreateDoc }: SidebarProps) {
-  const [docTree, setDocTree] = useState<FileNode[]>([])
-  const [loading, setLoading] = useState(true)
+  const [showCreateDirModal, setShowCreateDirModal] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null)
+
+  const {
+    directories,
+    loading,
+    error,
+    loadDirectories,
+    createDirectory,
+    createDocument,
+    selectDirectory
+  } = useFileSystem()
+
   const { setCurrentDocument } = useDocumentStore()
 
-  // 加载文档树
+  // 加载目录列表
   useEffect(() => {
-    loadDocTree()
-  }, [])
+    loadDirectories()
+  }, [loadDirectories])
 
-  const loadDocTree = async () => {
+  // 创建目录
+  const handleCreateDirectory = async (name: string) => {
     try {
-      setLoading(true)
-      const tree = await FileService.getDocTree()
-      setDocTree(tree)
+      await createDirectory(name)
     } catch (error) {
-      console.error('加载文档树失败:', error)
-    } finally {
-      setLoading(false)
+      console.error('创建目录失败:', error)
+      throw error
     }
   }
 
-  // 点击文档文件
-  const handleFileClick = async (node: FileNode) => {
-    if (node.type !== 'file') return
-
+  // 创建文档
+  const handleCreateDocument = async (directory: string, name: string) => {
     try {
-      const content = await FileService.readDocument(node.path)
+      const newDoc = await createDocument(directory, name)
+      // 创建成功后打开文档进行编辑
+      setCurrentDocument(newDoc)
+      setSelectedDocument(newDoc.path)
+    } catch (error) {
+      console.error('创建文档失败:', error)
+      throw error
+    }
+  }
 
-      // 创建或更新文档
-      const doc = await DocumentService.createDocument(
-        node.path.replace('/project-docs/', ''),
-        node.name,
-        content
-      )
+  // 选择文档
+  const handleSelectDocument = async (docPath: string) => {
+    try {
+      setSelectedDocument(docPath)
 
-      setCurrentDocument(doc)
+      // 从IndexedDB加载文档内容
+      const doc = await DocumentService.getDocumentByPath(docPath)
+      if (doc) {
+        setCurrentDocument(doc)
+      }
     } catch (error) {
       console.error('加载文档失败:', error)
     }
@@ -77,19 +95,58 @@ export function Sidebar({ onCreateDoc }: SidebarProps) {
         </div>
       </div>
 
-      {/* Document Tree */}
-      <div className="flex-1 overflow-y-auto p-2">
-        {loading ? (
-          <div className="text-center text-gray-500 py-8">
-            <div className="animate-pulse">加载文档中...</div>
+      {/* project-docs 目录列表 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-3 py-2">
+          {/* project-docs 标题行 */}
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">project-docs</h3>
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={loadDirectories}
+                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                title="刷新文件列表"
+              >
+                <RefreshCw size={14} />
+              </button>
+              <button
+                onClick={() => setShowCreateDirModal(true)}
+                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                title="创建新目录"
+              >
+                <FolderPlus size={14} />
+              </button>
+            </div>
           </div>
-        ) : docTree.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">
-            暂无文档
+
+          {/* 目录列表 */}
+          <div className="space-y-1">
+            {loading ? (
+              <div className="text-center text-gray-500 py-4">
+                <div className="animate-pulse text-sm">加载目录中...</div>
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-500 py-4">
+                <div className="text-sm">{error}</div>
+              </div>
+            ) : directories.length === 0 ? (
+              <div className="text-center text-gray-400 py-4">
+                <div className="text-sm">暂无目录</div>
+                <div className="text-xs mt-1">点击上方 + 按钮创建第一个目录</div>
+              </div>
+            ) : (
+              directories.map((directory) => (
+                <DirectoryItem
+                  key={directory.path}
+                  directory={directory}
+                  onCreateDocument={handleCreateDocument}
+                  onSelectDocument={handleSelectDocument}
+                  selectedDocument={selectedDocument}
+                />
+              ))
+            )}
           </div>
-        ) : (
-          <DocTree nodes={docTree} onFileClick={handleFileClick} />
-        )}
+        </div>
       </div>
 
       {/* Footer */}
@@ -98,6 +155,14 @@ export function Sidebar({ onCreateDoc }: SidebarProps) {
           生成AI上下文
         </button>
       </div>
+
+      {/* 创建目录模态框 */}
+      <CreateDirectoryModal
+        isOpen={showCreateDirModal}
+        onClose={() => setShowCreateDirModal(false)}
+        onCreate={handleCreateDirectory}
+        existingNames={directories.map(dir => dir.name)}
+      />
     </div>
   )
 }

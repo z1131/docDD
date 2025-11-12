@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Sidebar } from './components/layout/Sidebar'
+import { FloatingLayout } from './components/layout/FloatingLayout'
 import { DocumentEditor } from './components/editor/DocumentEditor'
 import { useDocumentStore } from './store/document.store'
 import { DocumentService } from './services/document.service'
@@ -33,13 +34,24 @@ function App() {
     )
   }
 
+  // 创建侧栏
+  const sidebar = (
+    <Sidebar onCreateDoc={handleCreateDoc} />
+  )
+
+  // 创建顶栏 - 简化版本，只显示应用标题
+  const header = (
+    <div className="px-6 py-3 flex items-center">
+      <h1 className="text-xl font-semibold text-gray-900">Dodo</h1>
+    </div>
+  )
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar onCreateDoc={handleCreateDoc} />
-      <div className="flex-1">
+    <FloatingLayout sidebar={sidebar} header={header}>
+      <div className="h-full bg-white">
         <DocumentEditor />
       </div>
-    </div>
+    </FloatingLayout>
   )
 }
 

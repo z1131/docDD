@@ -61,6 +61,14 @@ export class DocumentService {
   }
 
   /**
+   * 根据路径获取文档
+   */
+  static async getDocumentByPath(path: string): Promise<Document | undefined> {
+    const allDocs = await DocumentStore.getAll()
+    return allDocs.find(doc => doc.path === path)
+  }
+
+  /**
    * 获取所有文档
    */
   static async getAllDocuments(): Promise<Document[]> {
